@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: rock-in-roll
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false

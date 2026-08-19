@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17110f">
+  <title>Rock In Roll | CGC Mohali</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+    :root { --ink:#211719; --paper:#fff8e9; --cream:#f7eddc; --mustard:#f6c509; --orange:#ed621d; --red:#c7321f; --muted:#776b65; --card:#fffdf7; --line:#e8dcc8; --shadow:0 15px 35px rgba(48,27,16,.13); }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; color:var(--ink); background:var(--paper); font-family:'DM Sans',sans-serif; }
+    button, input, select { font:inherit; }
+    button { cursor:pointer; border:0; }
+    .site-shell { min-height:100vh; overflow:hidden; }
+    .topbar { height:38px; background:var(--mustard); display:flex; justify-content:center; align-items:center; padding:0 20px; font-size:.76rem; font-weight:700; letter-spacing:.04em; text-align:center; }
+    nav { display:flex; align-items:center; justify-content:space-between; padding:18px max(5vw,24px); background:#181110; color:#fff; position:sticky; top:0; z-index:20; }
+    .brand { font-family:Anton,sans-serif; letter-spacing:.08em; font-size:1.55rem; line-height:1; }
+    .brand span { color:var(--mustard); }
+    .nav-actions { display:flex; gap:10px; align-items:center; }
+    .nav-link { display:none; background:transparent; color:#fff; font-weight:600; padding:8px 12px; }
+    .cart-button, .admin-button { border-radius:999px; font-weight:700; padding:10px 15px; }
+    .cart-button { background:var(--mustard); color:var(--ink); }
+    .admin-button { background:#372a26; color:#fff; }
+    .cart-count { background:var(--ink); color:#fff; border-radius:50%; padding:1px 6px; margin-left:5px; font-size:.75rem; }
+    .hero { min-height:530px; position:relative; isolation:isolate; color:#fff; display:flex; align-items:center; padding:64px max(5vw,24px); background:linear-gradient(110deg,rgba(19,12,11,.96) 0%,rgba(28,17,15,.9) 45%,rgba(28,17,15,.55) 100%), radial-gradient(circle at 86% 60%,#ef711f 0 10%,transparent 10.5%), radial-gradient(circle at 75% 25%,#f7c808 0 6%,transparent 6.5%), #3c2420; }
+    .hero:after { content:""; position:absolute; inset:0; z-index:-1; opacity:.18; background-image:linear-gradient(45deg,transparent 47%,#fff 48%,transparent 50%); background-size:21px 21px; }
+    .hero-copy { max-width:670px; }
+    .eyebrow { font-size:.78rem; letter-spacing:.15em; text-transform:uppercase; font-weight:700; color:var(--mustard); }
+    h1,h2,h3,p { margin-top:0; }
+    h1 { font-family:Anton,sans-serif; font-size:clamp(3.8rem,10vw,8.5rem); line-height:.88; letter-spacing:.025em; margin:12px 0 18px; font-weight:400; }
+    h1 em { color:var(--mustard); font-style:normal; }
+    .hero p { max-width:500px; font-size:1.08rem; line-height:1.65; color:#f3e7dc; }
+    .action { display:inline-flex; align-items:center; justify-content:center; min-height:48px; padding:0 22px; border-radius:5px; font-weight:700; text-decoration:none; transition:transform .2s,box-shadow .2s; }
+    .action:hover { transform:translateY(-2px); box-shadow:0 8px 18px rgba(0,0,0,.22); }
+    .primary { background:var(--mustard); color:var(--ink); }
+    .outline { border:1px solid currentColor; color:inherit; background:transparent; }
+    .stats { position:absolute; bottom:26px; right:max(5vw,24px); display:flex; gap:25px; text-align:center; }
+    .stat strong { display:block; font-family:Anton,sans-serif; font-size:1.8rem; color:var(--mustard); font-weight:400; }
+    .stat span { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.09em; }
+    main { max-width:1280px; margin:auto; padding:82px max(5vw,24px); }
+    .section-heading { display:flex; justify-content:space-between; gap:20px; align-items:end; margin-bottom:28px; }
+    h2 { font-family:Anton,sans-serif; font-size:clamp(2.5rem,5vw,4.25rem); line-height:.95; letter-spacing:.02em; margin-bottom:0; font-weight:400; }
+    .section-heading p { color:var(--muted); max-width:330px; line-height:1.5; margin-bottom:0; }
+    .category-tabs { display:flex; overflow:auto; gap:9px; padding-bottom:12px; margin-bottom:21px; }
+    .category-tab { flex:0 0 auto; padding:10px 16px; border-radius:999px; background:#eadbc8; color:#634d46; font-weight:700; }
+    .category-tab.active { background:var(--ink); color:#fff; }
+    .menu-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:17px; }
+    .menu-item { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:19px; display:flex; flex-direction:column; min-height:190px; box-shadow:0 5px 14px rgba(41,21,12,.04); }
+    .food-mark { width:48px; height:48px; display:grid; place-items:center; font-size:1.75rem; background:#fff1cb; border-radius:50%; margin-bottom:17px; }
+    .menu-item h3 { font-size:1.03rem; margin-bottom:7px; line-height:1.25; }
+    .menu-item p { font-size:.8rem; color:var(--muted); margin-bottom:15px; }
+    .item-bottom { display:flex; align-items:center; justify-content:space-between; margin-top:auto; }
+    .price { font-size:1.12rem; font-weight:700; }
+    .add { background:var(--ink); color:#fff; padding:8px 13px; border-radius:6px; font-size:.82rem; font-weight:700; }
+    .add:hover { background:var(--orange); }
+    .info-strip { margin:30px 0 0; padding:25px; background:var(--orange); color:#fff; border-radius:12px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
+    .info-strip h3 { margin-bottom:4px; font-size:1.35rem; }
+    .info-strip p { margin:0; color:#ffede1; }
+    .info-strip a { color:#fff; font-weight:700; white-space:nowrap; }
+    .drawer { position:fixed; z-index:60; top:0; right:-470px; width:min(100%,470px); height:100%; background:var(--card); box-shadow:-12px 0 45px rgba(0,0,0,.19); transition:right .3s; display:flex; flex-direction:column; }
+    .drawer.open { right:0; }
+    .drawer-head { display:flex; align-items:center; justify-content:space-between; padding:25px; border-bottom:1px solid var(--line); }
+    .drawer h2 { font-size:2.3rem; }
+    .icon-button { width:38px; height:38px; border-radius:50%; background:#f0e4d4; font-size:1.35rem; }
+    .cart-items { overflow:auto; padding:8px 25px; flex:1; }
+    .empty { color:var(--muted); text-align:center; padding:50px 10px; }
+    .cart-item { display:grid; grid-template-columns:1fr auto; gap:5px 15px; padding:18px 0; border-bottom:1px solid var(--line); }
+    .cart-item h3 { font-size:.95rem; margin:0; }
+    .cart-item small { color:var(--muted); }
+    .quantity-controls { grid-column:1 / -1; display:flex; align-items:center; justify-content:space-between; margin-top:4px; }
+    .quantity { display:flex; align-items:center; gap:9px; background:#f1e6d7; padding:5px; border-radius:6px; }
+    .quantity button { background:#fff; width:27px; height:27px; border-radius:4px; font-weight:700; }
+    .remove { background:transparent; color:var(--red); font-size:.78rem; font-weight:700; }
+    .cart-footer { padding:20px 25px 25px; border-top:1px solid var(--line); }
+    .total { display:flex; justify-content:space-between; font-size:1.13rem; font-weight:700; margin-bottom:15px; }
+    .wide { width:100%; }
+    .overlay { display:none; position:fixed; inset:0; z-index:50; background:rgba(22,12,9,.5); backdrop-filter:blur(2px); }
+    .overlay.show { display:block; }
+    .modal { display:none; z-index:80; position:fixed; inset:0; align-items:center; justify-content:center; padding:20px; background:rgba(22,12,9,.55); overflow:auto; }
+    .modal.show { display:flex; }
+    .modal-card { width:min(100%,640px); max-height:calc(100vh - 40px); overflow:auto; background:var(--card); border-radius:15px; padding:30px; box-shadow:var(--shadow); }
+    .modal-card.narrow { width:min(100%,430px); }
+    .modal-top { display:flex; justify-content:space-between; align-items:start; gap:18px; margin-bottom:22px; }
+    .modal-top h2 { font-size:2.65rem; }
+    .modal-top p { color:var(--muted); margin:6px 0 0; }
+    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .form-field { display:flex; flex-direction:column; gap:7px; font-size:.82rem; font-weight:700; }
+    .form-field.full { grid-column:1/-1; }
+    input, select { min-height:46px; border:1px solid #dfd0bf; border-radius:6px; padding:0 12px; background:#fffdfa; color:var(--ink); }
+    .payment-options { grid-column:1/-1; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .payment-option { border:2px solid #e2d6c8; border-radius:8px; padding:13px; text-align:left; background:#fff; }
+    .payment-option.selected { border-color:var(--orange); background:#fff6e8; }
+    .payment-option strong, .payment-option span { display:block; }
+    .payment-option span { font-size:.77rem; color:var(--muted); margin-top:3px; }
+    .checkout-total { background:#f3e8d8; margin:22px 0 15px; padding:16px; border-radius:7px; display:flex; justify-content:space-between; font-weight:700; }
+    .admin-panel { background:#201514; color:#fff; border-radius:16px; padding:clamp(22px,4vw,44px); margin-top:85px; }
+    .admin-heading { display:flex; justify-content:space-between; gap:20px; align-items:start; }
+    .admin-heading h2 { color:var(--mustard); }
+    .admin-heading p { color:#d8c7bf; max-width:570px; line-height:1.55; }
+    .admin-gate { margin-top:28px; padding:22px; border:1px solid #493734; border-radius:10px; display:flex; align-items:center; gap:18px; }
+    .admin-gate input { flex:1; background:#2c201e; color:white; border-color:#594541; }
+    .admin-content { display:none; margin-top:30px; }
+    .admin-content.active { display:block; }
+    .dashboard-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:30px; }
+    .dashboard-card { background:#302220; padding:19px; border-radius:9px; }
+    .dashboard-card span { display:block; color:#d3bdb2; font-size:.76rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+    .dashboard-card strong { display:block; color:var(--mustard); font-family:Anton,sans-serif; font-size:2.4rem; font-weight:400; margin-top:5px; }
+    .admin-columns { display:grid; grid-template-columns:1.15fr .85fr; gap:25px; }
+    .admin-block { border:1px solid #493734; border-radius:10px; padding:19px; }
+    .admin-block h3 { margin-bottom:16px; }
+    .admin-menu-list, .order-list { display:flex; flex-direction:column; gap:9px; max-height:330px; overflow:auto; }
+    .admin-menu-row, .order-row { background:#302220; border-radius:7px; padding:12px; }
+    .admin-menu-row { display:grid; grid-template-columns:1fr 84px auto; align-items:center; gap:8px; }
+    .admin-menu-row span { font-size:.87rem; font-weight:700; }
+    .admin-menu-row input { min-height:35px; padding:0 8px; border:0; background:#43322e; color:#fff; }
+    .tiny { padding:8px 10px; border-radius:5px; background:var(--mustard); color:var(--ink); font-size:.72rem; font-weight:700; }
+    .tiny.danger { background:#7d3029; color:#fff; }
+    .add-form { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .add-form input, .add-form select { min-height:38px; }
+    .add-form .full { grid-column:1/-1; }
+    .order-row { border-left:3px solid var(--mustard); }
+    .order-row header { display:flex; justify-content:space-between; gap:10px; font-size:.8rem; font-weight:700; }
+    .order-row p { color:#d9c9c1; font-size:.77rem; margin:7px 0; line-height:1.45; }
+    .order-row footer { color:var(--mustard); font-size:.78rem; font-weight:700; display:flex; justify-content:space-between; }
+    .notice { display:none; position:fixed; z-index:100; right:20px; bottom:20px; width:min(370px,calc(100% - 40px)); background:#1f1614; color:#fff; padding:17px 18px; border-left:5px solid var(--mustard); border-radius:7px; box-shadow:var(--shadow); animation:rise .35s ease; }
+    .notice.show { display:block; }
+    .notice strong { display:block; color:var(--mustard); margin-bottom:3px; }
+    .toast { position:fixed; z-index:120; left:50%; bottom:24px; transform:translate(-50%,100px); background:var(--ink); color:#fff; padding:12px 17px; border-radius:999px; font-size:.86rem; font-weight:600; transition:transform .25s; box-shadow:var(--shadow); }
+    .toast.show { transform:translate(-50%,0); }
+    @keyframes rise { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    @media (min-width:780px) { .nav-link { display:block; } }
+    @media (max-width:850px) { .menu-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .admin-columns { grid-template-columns:1fr; } }
+    @media (max-width:600px) { nav { padding:15px 18px; } .brand { font-size:1.25rem; } .admin-button { display:none; } .hero { min-height:520px; padding-top:38px; align-items:start; } .stats { position:static; margin-top:42px; justify-content:space-between; } .hero-copy { width:100%; } .section-heading { display:block; } .section-heading p { margin-top:13px; } main { padding-top:58px; } .menu-grid { grid-template-columns:1fr; } .info-strip { display:block; } .info-strip a { display:inline-block; margin-top:14px; } .form-grid, .payment-options { grid-template-columns:1fr; } .admin-gate { display:grid; } .dashboard-cards { grid-template-columns:1fr; } .admin-heading { display:block; } .admin-menu-row { grid-template-columns:1fr 76px auto; } }
+  </style>
+</head>
+<body>
+  <div class="site-shell">
+    <div class="topbar">CGC MOHALI CAMPUS DELIVERY &nbsp;•&nbsp; Fresh rolls. Big flavour. No boring meals.</div>
+    <nav>
+      <div class="brand">ROCK <span>IN</span> ROLL</div>
+      <div class="nav-actions">
+        <a class="nav-link" href="#menu">Menu</a>
+        <a class="nav-link" href="#admin">Admin</a>
+        <button class="cart-button" id="openCart">Your order <span class="cart-count" id="cartCount">0</span></button>
+        <button class="admin-button" id="jumpAdmin">Admin panel</button>
+      </div>
+    </nav>
+    <header class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">The real taste of roll • CGC Mohali</div>
+        <h1>ROLL WITH<br><em>THE GOOD</em><br>STUFF.</h1>
+        <p>Campus hunger has met its match. Order your favourite roll, noodles or fried rice straight to your hostel room.</p>
+        <a href="#menu" class="action primary">Start your order →</a>
+        <div class="stats"><div class="stat"><strong>25–35</strong><span>mins delivery</span></div><div class="stat"><strong>₹40+</strong><span>campus eats</span></div><div class="stat"><strong>7 days</strong><span>of flavour</span></div></div>
+      </div>
+    </header>
+    <main>
+      <section id="menu">
+        <div class="section-heading"><div><div class="eyebrow" style="color:var(--orange)">Choose your craving</div><h2>THE MENU</h2></div><p>Made hot, packed fast, and brought right to your hostel.</p></div>
+        <div class="category-tabs" id="categoryTabs"></div>
+        <div class="menu-grid" id="menuGrid"></div>
+        <div class="info-strip"><div><h3>Call for a quick order</h3><p>Want to order directly? Give the outlet a ring.</p></div><a href="tel:9501714559">+91 95017 14559 →</a></div>
+      </section>
+      <section class="admin-panel" id="admin">
+        <div class="admin-heading"><div><div class="eyebrow">Outlet control centre</div><h2>ADMIN PANEL</h2></div><p>Add menu items, update prices, remove sold-out options, and see every incoming hostel order in one place.</p></div>
+        <div class="admin-gate" id="adminGate"><span>Enter admin password to manage the outlet.</span><input id="adminPassword" type="password" placeholder="Password"><button class="action primary" id="adminLogin">Unlock panel</button></div>
+        <div class="admin-content" id="adminContent">
+          <div class="dashboard-cards"><div class="dashboard-card"><span>Orders received</span><strong id="orderMetric">0</strong></div><div class="dashboard-card"><span>Today's sales</span><strong id="salesMetric">₹0</strong></div><div class="dashboard-card"><span>Menu items</span><strong id="menuMetric">0</strong></div></div>
+          <div class="admin-columns"><div class="admin-block"><h3>Manage menu</h3><div class="admin-menu-list" id="adminMenuList"></div></div><div><div class="admin-block"><h3>Add a new item</h3><form class="add-form" id="addItemForm"><input class="full" name="name" required placeholder="Item name"><input name="price" required min="1" type="number" placeholder="Price (₹)"><select name="category"><option>Egg Roll</option><option>Veg Roll</option><option>Chicken Roll</option><option>Rice</option><option>Noodles</option><option>Cold Drinks</option></select><button class="action primary full" type="submit">Add to menu</button></form></div><div class="admin-block" style="margin-top:16px"><h3>Live order history</h3><div class="order-list" id="orderList"></div></div></div></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div class="overlay" id="overlay"></div>
+  <aside class="drawer" id="cartDrawer"><div class="drawer-head"><h2>Your order</h2><button class="icon-button closeDrawer">×</button></div><div class="cart-items" id="cartItems"></div><div class="cart-footer"><div class="total"><span>Total</span><span id="cartTotal">₹0</span></div><button class="action primary wide" id="checkoutButton">Continue to checkout</button></div></aside>
+  <div class="modal" id="checkoutModal"><div class="modal-card"><div class="modal-top"><div><h2>Almost there.</h2><p>Tell us where to bring your order.</p></div><button class="icon-button closeModal">×</button></div><form id="checkoutForm"><div class="form-grid"><label class="form-field"><span>Your name</span><input name="customerName" required placeholder="e.g. Aman Sharma"></label><label class="form-field"><span>Phone number</span><input name="phone" required pattern="[0-9]{10}" maxlength="10" inputmode="numeric" placeholder="10-digit mobile number"></label><label class="form-field"><span>Email address</span><input name="email" type="email" required placeholder="you@example.com"></label><label class="form-field"><span>Hostel name</span><input name="hostel" required placeholder="e.g. Boys Hostel 3"></label><label class="form-field"><span>Room number</span><input name="room" required placeholder="e.g. A-214"></label><label class="form-field full"><span>Payment method</span><span class="payment-options"><button class="payment-option selected" type="button" data-payment="Razorpay"><strong>Pay online with Razorpay</strong><span>UPI / card / wallet</span></button><button class="payment-option" type="button" data-payment="Cash on delivery"><strong>Cash on delivery</strong><span>Pay at your room</span></button></span></label></div><div class="checkout-total"><span>Amount to pay</span><span id="checkoutTotal">₹0</span></div><button class="action primary wide" type="submit" id="placeOrder">Pay with Razorpay →</button></form></div></div>
+  <div class="modal" id="loginModal"><div class="modal-card narrow"><div class="modal-top"><div><h2>Welcome back.</h2><p>Use the admin password to open management tools.</p></div><button class="icon-button closeLogin">×</button></div><form id="modalLoginForm"><label class="form-field"><span>Admin password</span><input id="modalPassword" type="password" required placeholder="Password"></label><button class="action primary wide" style="margin-top:18px" type="submit">Open admin panel</button></form></div></div>
+  <div class="notice" id="orderNotice"><strong>New order received 🔔</strong><span id="noticeText"></span></div><div class="toast" id="toast"></div>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    const defaultMenu = [
+      ['Egg Roll','Egg Roll',40,'🥚'],['Double Egg Roll','Egg Roll',50,'🥚'],['Egg Paneer Roll','Egg Roll',60,'🌯'],['Double Egg Paneer Roll','Egg Roll',70,'🌯'],['Egg Noodles Roll','Egg Roll',70,'🍜'],['Egg Veg Roll','Egg Roll',60,'🥬'],
+      ['Veg Roll','Veg Roll',50,'🥬'],['Paneer Roll','Veg Roll',60,'🧀'],['Double Paneer Roll','Veg Roll',80,'🧀'],['Noodles Roll','Veg Roll',60,'🍜'],['Veg Paneer Roll','Veg Roll',70,'🌯'],['Soya Chaap Roll','Veg Roll',70,'🌯'],['Paneer Noodles Roll','Veg Roll',80,'🍜'],
+      ['Chicken Roll','Chicken Roll',90,'🍗'],['Chicken Paneer Roll','Chicken Roll',100,'🍗'],['Egg Chicken Roll','Chicken Roll',100,'🍗'],['Double Chicken Roll','Chicken Roll',110,'🍗'],['Egg Chicken Paneer Roll','Chicken Roll',110,'🍗'],['Double Chicken Paneer Roll','Chicken Roll',140,'🍗'],
+      ['Veg Fried Rice','Rice',70,'🍚'],['Soya Chaap Fried Rice','Rice',80,'🍚'],['Paneer Fried Rice','Rice',90,'🍚'],['Egg Fried Rice','Rice',80,'🍚'],['Chicken Fried Rice','Rice',90,'🍚'],
+      ['Veg Noodles','Noodles',70,'🍜'],['Soya Chaap Noodles','Noodles',80,'🍜'],['Paneer Noodles','Noodles',90,'🍜'],['Egg Noodles','Noodles',80,'🍜'],['Chicken Noodles','Noodles',90,'🍜'],['Cold Drink','Cold Drinks',40,'🥤']
+    ].map((item,index)=>({id:index+1,name:item[0],category:item[1],price:item[2],icon:item[3]}));
+    const storage = { get(key,fallback){ try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } }, set(key,value){ localStorage.setItem(key,JSON.stringify(value)); } };
+    let menu = storage.get('rir-menu',defaultMenu), cart = storage.get('rir-cart',[]), orders = storage.get('rir-orders',[]), activeCategory = 'All', payment = 'Razorpay';
+    const q = selector => document.querySelector(selector);
+    const money = value => `₹${Number(value).toLocaleString('en-IN')}`;
+    function save(){ storage.set('rir-menu',menu); storage.set('rir-cart',cart); storage.set('rir-orders',orders); }
+    function toast(message){ const element=q('#toast'); element.textContent=message; element.classList.add('show'); setTimeout(()=>element.classList.remove('show'),2200); }
+    function renderMenu(){ const categories=['All',...new Set(menu.map(item=>item.category))]; q('#categoryTabs').innerHTML=categories.map(category=>`<button class="category-tab ${category===activeCategory?'active':''}" data-category="${category}">${category}</button>`).join(''); const visible=activeCategory==='All'?menu:menu.filter(item=>item.category===activeCategory); q('#menuGrid').innerHTML=visible.length?visible.map(item=>`<article class="menu-item"><div class="food-mark">${item.icon||'🍽️'}</div><h3>${item.name}</h3><p>${item.category}</p><div class="item-bottom"><span class="price">${money(item.price)}</span><button class="add" data-add="${item.id}">Add +</button></div></article>`).join(''):'<p class="empty">Nothing in this category right now.</p>';
+      document.querySelectorAll('[data-category]').forEach(button=>button.addEventListener('click',()=>{activeCategory=button.dataset.category;renderMenu();})); document.querySelectorAll('[data-add]').forEach(button=>button.addEventListener('click',()=>addToCart(Number(button.dataset.add)))); }
+    function cartTotal(){ return cart.reduce((sum,line)=>sum+line.price*line.quantity,0); }
+    function renderCart(){ q('#cartCount').textContent=cart.reduce((sum,line)=>sum+line.quantity,0); q('#cartTotal').textContent=money(cartTotal()); q('#checkoutTotal').textContent=money(cartTotal()); q('#checkoutButton').disabled=!cart.length; q('#checkoutButton').style.opacity=cart.length?'1':'.45'; q('#cartItems').innerHTML=cart.length?cart.map(line=>`<div class="cart-item"><div><h3>${line.name}</h3><small>${money(line.price)} each</small></div><strong>${money(line.price*line.quantity)}</strong><div class="quantity-controls"><div class="quantity"><button data-change="${line.id}" data-amount="-1">−</button><strong>${line.quantity}</strong><button data-change="${line.id}" data-amount="1">+</button></div><button class="remove" data-remove="${line.id}">Remove</button></div></div>`).join(''):'<p class="empty">Your cart is waiting for something delicious.</p>'; document.querySelectorAll('[data-change]').forEach(button=>button.addEventListener('click',()=>changeQuantity(Number(button.dataset.change),Number(button.dataset.amount))));document.querySelectorAll('[data-remove]').forEach(button=>button.addEventListener('click',()=>removeItem(Number(button.dataset.remove)))); }
+    function addToCart(id){ const item=menu.find(menuItem=>menuItem.id===id); const existing=cart.find(line=>line.id===id); if(existing) existing.quantity++; else cart.push({...item,quantity:1}); save();renderCart();toast(`${item.name} added to your order`); }
+    function changeQuantity(id,amount){ const line=cart.find(item=>item.id===id); line.quantity+=amount; if(line.quantity<1) cart=cart.filter(item=>item.id!==id); save();renderCart(); }
+    function removeItem(id){ cart=cart.filter(item=>item.id!==id);save();renderCart(); }
+    function renderAdmin(){ q('#orderMetric').textContent=orders.length; q('#salesMetric').textContent=money(orders.reduce((sum,order)=>sum+order.total,0)); q('#menuMetric').textContent=menu.length; q('#adminMenuList').innerHTML=menu.map(item=>`<div class="admin-menu-row"><span>${item.name}</span><input aria-label="Price for ${item.name}" type="number" min="1" value="${item.price}" data-price="${item.id}"><button class="tiny danger" data-delete="${item.id}">Remove</button></div>`).join(''); q('#orderList').innerHTML=orders.length?orders.map(order=>`<article class="order-row"><header><span>${order.id}</span><span>${order.payment}</span></header><p><strong>${order.customerName}</strong> · ${order.hostel}, Room ${order.room}<br>${order.items}</p><footer><span>${order.time}</span><span>${money(order.total)}</span></footer></article>`).join(''):'<p style="color:#d8c7bf;font-size:.85rem">New orders will appear here instantly.</p>';document.querySelectorAll('[data-price]').forEach(input=>input.addEventListener('change',()=>{const item=menu.find(menuItem=>menuItem.id===Number(input.dataset.price));item.price=Number(input.value);cart=cart.map(line=>line.id===item.id?{...line,price:item.price}:line);save();renderMenu();renderCart();renderAdmin();toast('Price updated');}));document.querySelectorAll('[data-delete]').forEach(button=>button.addEventListener('click',()=>{menu=menu.filter(item=>item.id!==Number(button.dataset.delete));cart=cart.filter(item=>item.id!==Number(button.dataset.delete));save();renderMenu();renderCart();renderAdmin();toast('Item removed from menu');})); }
+    function setDrawer(open){q('#cartDrawer').classList.toggle('open',open);q('#overlay').classList.toggle('show',open);}
+    function setModal(id,show){q(id).classList.toggle('show',show);}
+    function unlock(password){ if(password!=='rocknroll') { toast('Incorrect admin password'); return false; } q('#adminGate').style.display='none';q('#adminContent').classList.add('active');renderAdmin();toast('Admin panel unlocked');return true; }
+    q('#openCart').addEventListener('click',()=>setDrawer(true));q('#overlay').addEventListener('click',()=>setDrawer(false));document.querySelector('.closeDrawer').addEventListener('click',()=>setDrawer(false));q('#jumpAdmin').addEventListener('click',()=>q('#admin').scrollIntoView());
+    q('#checkoutButton').addEventListener('click',()=>{if(!cart.length)return;setDrawer(false);setModal('#checkoutModal',true);});document.querySelector('.closeModal').addEventListener('click',()=>setModal('#checkoutModal',false));q('#checkoutModal').addEventListener('click',event=>{if(event.target===q('#checkoutModal'))setModal('#checkoutModal',false)});
+    function finishOrder(order,message){orders.unshift(order);cart=[];save();renderCart();renderAdmin();setModal('#checkoutModal',false);q('#checkoutForm').reset();q('#noticeText').textContent=`${order.customerName} ordered ${money(order.total)} for ${order.hostel}, Room ${order.room}.`;q('#orderNotice').classList.add('show');setTimeout(()=>q('#orderNotice').classList.remove('show'),7000);toast(message);}
+    async function startRazorpay(order){const button=q('#placeOrder');button.disabled=true;button.textContent='Opening Razorpay…';try{const response=await fetch('/api/razorpay/create-order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({amount:Math.round(order.total*100),customerName:order.customerName,email:order.email,phone:order.phone,hostel:order.hostel,room:order.room,items:order.items})});const result=await response.json().catch(()=>({}));if(!response.ok||!result.orderId)throw new Error(result.message||'Start the Razorpay server with `node server.js` first.');const razorpay=new Razorpay({key:result.keyId,amount:result.amount,currency:result.currency,name:'Rock In Roll',description:`Food order ${order.id}`,order_id:result.orderId,prefill:{name:order.customerName,email:order.email,contact:`+91${order.phone}`},notes:{hostel:order.hostel,room:order.room,items:order.items},theme:{color:'#f6c509'},handler:async paymentResponse=>{const verifyResponse=await fetch('/api/razorpay/verify-payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({orderId:result.orderId,paymentId:paymentResponse.razorpay_payment_id,signature:paymentResponse.razorpay_signature})});const verification=await verifyResponse.json().catch(()=>({}));if(!verifyResponse.ok||!verification.verified){button.disabled=false;button.textContent='Pay with Razorpay →';toast('Payment verification failed. Please contact the outlet.');return;}order.gatewayOrderId=result.orderId;order.payment='Razorpay (paid)';finishOrder(order,'Payment successful — order sent!');}});razorpay.on('payment.failed',failure=>{button.disabled=false;button.textContent='Pay with Razorpay →';toast(failure.error?.description||'Razorpay payment was not completed.');});razorpay.open();}catch(error){button.disabled=false;button.textContent='Pay with Razorpay →';toast(error.message||'Unable to start Razorpay checkout');}}
+    document.querySelectorAll('.payment-option').forEach(button=>button.addEventListener('click',()=>{payment=button.dataset.payment;document.querySelectorAll('.payment-option').forEach(option=>option.classList.toggle('selected',option===button));q('#placeOrder').textContent=payment==='Razorpay'?'Pay with Razorpay →':'Place cash order';}));
+    q('#checkoutForm').addEventListener('submit',async event=>{event.preventDefault();if(!cart.length)return;const form=new FormData(event.target);const total=cartTotal();const order={id:`RIR-${String(Date.now()).slice(-6)}`,customerName:form.get('customerName'),email:form.get('email'),hostel:form.get('hostel'),room:form.get('room'),phone:form.get('phone'),payment,total,items:cart.map(line=>`${line.name} ×${line.quantity}`).join(', '),time:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})};if(payment==='Razorpay'){await startRazorpay(order);return;}finishOrder(order,'Order sent to Rock In Roll!');});
+    q('#adminLogin').addEventListener('click',()=>unlock(q('#adminPassword').value));q('#adminPassword').addEventListener('keydown',event=>{if(event.key==='Enter')unlock(event.target.value)});q('#modalLoginForm').addEventListener('submit',event=>{event.preventDefault();if(unlock(q('#modalPassword').value)){setModal('#loginModal',false);q('#admin').scrollIntoView();}});q('.closeLogin').addEventListener('click',()=>setModal('#loginModal',false));
+    q('#addItemForm').addEventListener('submit',event=>{event.preventDefault();const form=new FormData(event.target);menu.push({id:Date.now(),name:form.get('name'),price:Number(form.get('price')),category:form.get('category'),icon:'🍽️'});save();event.target.reset();renderMenu();renderAdmin();toast('New item added to menu');});
+    renderMenu();renderCart();renderAdmin();
+  </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "rock-in-roll-cgc-ordering",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Rock In Roll CGC Mohali ordering website with Razorpay Standard Checkout",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
