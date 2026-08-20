@@ -7,6 +7,25 @@ const crypto = require('node:crypto');
 const outputRoot = __dirname;
 const port = Number(process.env.PORT || 4173);
 const pendingOrders = new Map();
+const ordersFile = path.join(outputRoot, 'orders.json');
+
+function loadOrders() {
+  if (!fs.existsSync(ordersFile)) return [];
+  try {
+    const orders = JSON.parse(fs.readFileSync(ordersFile, 'utf8'));
+    return Array.isArray(orders) ? orders : [];
+  } catch {
+    return [];
+  }
+}
+
+let orders = loadOrders();
+
+function saveOrders() {
+  const temporaryFile = `${ordersFile}.tmp`;
+  fs.writeFileSync(temporaryFile, JSON.stringify(orders, null, 2));
+  fs.renameSync(temporaryFile, ordersFile);
+}
 
 function loadEnvFile() {
   const envPath = path.join(outputRoot, '.env');
@@ -21,6 +40,26 @@ loadEnvFile();
 
 function clean(value, maxLength = 120) {
   return String(value || '').replace(/[<>]/g, '').trim().slice(0, maxLength);
+}
+
+function normalizeOrder(payload) {
+  const total = Number(payload.total);
+  const order = {
+    id: clean(payload.id, 80),
+    customerName: clean(payload.customerName, 120),
+    email: clean(payload.email, 160),
+    hostel: clean(payload.hostel, 120),
+    room: clean(payload.room, 40),
+    phone: clean(payload.phone, 15),
+    payment: clean(payload.payment, 80),
+    total: Math.round(total),
+    items: clean(payload.items, 500),
+    time: clean(payload.time, 40),
+    createdAt: clean(payload.createdAt, 40) || new Date().toISOString(),
+    gatewayOrderId: clean(payload.gatewayOrderId, 80)
+  };
+  if (!order.id || !order.customerName || !order.email.includes('@') || !order.hostel || !order.room || !/^\d{10}$/.test(order.phone) || !Number.isFinite(total) || total <= 0 || !order.items) return null;
+  return order;
 }
 
 function sendJson(response, status, payload) {
@@ -106,6 +145,22 @@ async function verifyRazorpayPayment(request, response) {
   sendJson(response, verified ? 200 : 400, { verified });
 }
 
+async function createOrder(request, response) {
+  let payload;
+  try { payload = JSON.parse(await readBody(request)); } catch { sendJson(response, 400, { message: 'Invalid order request.' }); return; }
+  const order = normalizeOrder(payload);
+  if (!order) { sendJson(response, 400, { message: 'Please provide complete customer and order details.' }); return; }
+  const existingIndex = orders.findIndex(existingOrder => existingOrder.id === order.id);
+  if (existingIndex >= 0) orders[existingIndex] = { ...orders[existingIndex], ...order };
+  else orders.unshift(order);
+  try { saveOrders(); } catch { sendJson(response, 500, { message: 'Order could not be saved.' }); return; }
+  sendJson(response, 201, { order });
+}
+
+function listOrders(response) {
+  sendJson(response, 200, { orders });
+}
+
 async function verifyWebhook(request, response) {
   const body = await readBody(request);
   const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
@@ -130,7 +185,9 @@ const server = http.createServer(async (request, response) => {
   try {
     if (request.method === 'POST' && request.url === '/api/razorpay/create-order') { await createRazorpayOrder(request, response); return; }
     if (request.method === 'POST' && request.url === '/api/razorpay/verify-payment') { await verifyRazorpayPayment(request, response); return; }
+    if (request.method === 'POST' && request.url === '/api/orders') { await createOrder(request, response); return; }
     if (request.method === 'POST' && request.url === '/api/razorpay/webhook') { await verifyWebhook(request, response); return; }
+    if (request.method === 'GET' && request.url === '/api/orders') { listOrders(response); return; }
     if (request.method === 'GET') { serveStatic(request, response); return; }
     response.writeHead(405); response.end('Method not allowed');
   } catch { sendJson(response, 500, { message: 'Payment server error.' }); }
