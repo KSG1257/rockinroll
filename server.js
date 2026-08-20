@@ -7,8 +7,6 @@ const crypto = require('node:crypto');
 const outputRoot = __dirname;
 const port = Number(process.env.PORT || 4173);
 const pendingOrders = new Map();
-const adminTokens = new Map();
-const adminPassword = process.env.ADMIN_PASSWORD || 'rocknroll';
 const ordersFile = path.join(outputRoot, 'orders.json');
 
 function loadOrders() {
@@ -40,6 +38,10 @@ function loadEnvFile() {
 
 loadEnvFile();
 
+const adminPassword = process.env.ADMIN_PASSWORD || 'rocknroll';
+const adminSessionSecret = process.env.ADMIN_SESSION_SECRET || adminPassword;
+const adminSessionDurationMs = 7 * 24 * 60 * 60 * 1000;
+
 function clean(value, maxLength = 120) {
   return String(value || '').replace(/[<>]/g, '').trim().slice(0, maxLength);
 }
@@ -64,9 +66,9 @@ function normalizeOrder(payload) {
   return order;
 }
 
-function sendJson(response, status, payload) {
+function sendJson(response, status, payload, headers = {}) {
   const body = JSON.stringify(payload);
-  response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(body) });
+  response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': Buffer.byteLength(body), ...headers });
   response.end(body);
 }
 
@@ -92,12 +94,29 @@ function secureMatch(expected, received) {
   return expectedBuffer.length === receivedBuffer.length && crypto.timingSafeEqual(expectedBuffer, receivedBuffer);
 }
 
+function readCookies(request) {
+  return String(request.headers.cookie || '').split(';').reduce((cookies, part) => {
+    const separator = part.indexOf('=');
+    if (separator < 0) return cookies;
+    cookies[part.slice(0, separator).trim()] = decodeURIComponent(part.slice(separator + 1).trim());
+    return cookies;
+  }, {});
+}
+
+function createAdminSession() {
+  const expiresAt = Date.now() + adminSessionDurationMs;
+  const signature = crypto.createHmac('sha256', adminSessionSecret).update(String(expiresAt)).digest('hex');
+  return { token: `${expiresAt}.${signature}`, expiresAt };
+}
+
 function hasValidAdminToken(request) {
-  const token = String(request.headers['x-admin-token'] || '');
-  const expiresAt = adminTokens.get(token);
-  if (!expiresAt) return false;
-  if (expiresAt < Date.now()) { adminTokens.delete(token); return false; }
-  return true;
+  const cookies = readCookies(request);
+  const token = String(request.headers['x-admin-token'] || cookies.rir_admin_session || '');
+  const [expiresAtText, signature] = token.split('.');
+  const expiresAt = Number(expiresAtText);
+  if (!Number.isSafeInteger(expiresAt) || expiresAt < Date.now() || !signature) return false;
+  const expected = crypto.createHmac('sha256', adminSessionSecret).update(String(expiresAt)).digest('hex');
+  return secureMatch(expected, signature);
 }
 
 function razorpayRequest(payload) {
@@ -183,9 +202,10 @@ async function loginAdmin(request, response) {
   let payload;
   try { payload = JSON.parse(await readBody(request)); } catch { sendJson(response, 400, { message: 'Invalid login request.' }); return; }
   if (!secureMatch(adminPassword, clean(payload.password, 120))) { sendJson(response, 401, { message: 'Incorrect admin password.' }); return; }
-  const token = crypto.randomBytes(32).toString('hex');
-  adminTokens.set(token, Date.now() + 8 * 60 * 60 * 1000);
-  sendJson(response, 200, { token });
+  const { token, expiresAt } = createAdminSession();
+  const secureCookie = request.headers['x-forwarded-proto'] === 'https' || request.socket.encrypted;
+  const cookie = `rir_admin_session=${encodeURIComponent(token)}; Max-Age=${Math.floor(adminSessionDurationMs / 1000)}; Path=/; HttpOnly; SameSite=Lax${secureCookie ? '; Secure' : ''}`;
+  sendJson(response, 200, { token, expiresAt }, { 'Set-Cookie': cookie });
 }
 
 function listOrders(request, response) {
