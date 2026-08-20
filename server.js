@@ -7,6 +7,8 @@ const crypto = require('node:crypto');
 const outputRoot = __dirname;
 const port = Number(process.env.PORT || 4173);
 const pendingOrders = new Map();
+const adminTokens = new Map();
+const adminPassword = process.env.ADMIN_PASSWORD || 'rocknroll';
 const ordersFile = path.join(outputRoot, 'orders.json');
 
 function loadOrders() {
@@ -71,11 +73,31 @@ function sendJson(response, status, payload) {
 function readBody(request) {
   return new Promise((resolve, reject) => {
     let body = '';
+    let size = 0;
+    const maxSize = 64 * 1024;
     request.setEncoding('utf8');
-    request.on('data', chunk => { body += chunk; });
+    request.on('data', chunk => {
+      size += Buffer.byteLength(chunk);
+      if (size > maxSize) { reject(new Error('Request body is too large.')); request.destroy(); return; }
+      body += chunk;
+    });
     request.on('end', () => resolve(body));
     request.on('error', reject);
   });
+}
+
+function secureMatch(expected, received) {
+  const expectedBuffer = Buffer.from(String(expected));
+  const receivedBuffer = Buffer.from(String(received));
+  return expectedBuffer.length === receivedBuffer.length && crypto.timingSafeEqual(expectedBuffer, receivedBuffer);
+}
+
+function hasValidAdminToken(request) {
+  const token = String(request.headers['x-admin-token'] || '');
+  const expiresAt = adminTokens.get(token);
+  if (!expiresAt) return false;
+  if (expiresAt < Date.now()) { adminTokens.delete(token); return false; }
+  return true;
 }
 
 function razorpayRequest(payload) {
@@ -157,7 +179,17 @@ async function createOrder(request, response) {
   sendJson(response, 201, { order });
 }
 
-function listOrders(response) {
+async function loginAdmin(request, response) {
+  let payload;
+  try { payload = JSON.parse(await readBody(request)); } catch { sendJson(response, 400, { message: 'Invalid login request.' }); return; }
+  if (!secureMatch(adminPassword, clean(payload.password, 120))) { sendJson(response, 401, { message: 'Incorrect admin password.' }); return; }
+  const token = crypto.randomBytes(32).toString('hex');
+  adminTokens.set(token, Date.now() + 8 * 60 * 60 * 1000);
+  sendJson(response, 200, { token });
+}
+
+function listOrders(request, response) {
+  if (!hasValidAdminToken(request)) { sendJson(response, 401, { message: 'Admin login required.' }); return; }
   sendJson(response, 200, { orders });
 }
 
@@ -174,20 +206,23 @@ async function verifyWebhook(request, response) {
 function serveStatic(request, response) {
   const requested = decodeURIComponent(new URL(request.url, `http://localhost:${port}`).pathname);
   const relative = requested === '/' ? 'index.html' : requested.replace(/^\/+/, '');
+  if (relative !== 'index.html') { response.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); response.end('Not found'); return; }
   const filePath = path.resolve(outputRoot, relative);
-  if (!filePath.startsWith(outputRoot) || !fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) { response.writeHead(404); response.end('Not found'); return; }
+  if (filePath !== path.join(outputRoot, 'index.html') || !fs.existsSync(filePath)) { response.writeHead(404); response.end('Not found'); return; }
   const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'application/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8' };
-  response.writeHead(200, { 'Content-Type': types[path.extname(filePath)] || 'application/octet-stream' });
+  response.writeHead(200, { 'Content-Type': types[path.extname(filePath)], 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin' });
   fs.createReadStream(filePath).pipe(response);
 }
 
 const server = http.createServer(async (request, response) => {
   try {
+    if (request.method === 'GET' && request.url === '/health') { sendJson(response, 200, { ok: true }); return; }
+    if (request.method === 'POST' && request.url === '/api/admin/login') { await loginAdmin(request, response); return; }
     if (request.method === 'POST' && request.url === '/api/razorpay/create-order') { await createRazorpayOrder(request, response); return; }
     if (request.method === 'POST' && request.url === '/api/razorpay/verify-payment') { await verifyRazorpayPayment(request, response); return; }
     if (request.method === 'POST' && request.url === '/api/orders') { await createOrder(request, response); return; }
     if (request.method === 'POST' && request.url === '/api/razorpay/webhook') { await verifyWebhook(request, response); return; }
-    if (request.method === 'GET' && request.url === '/api/orders') { listOrders(response); return; }
+    if (request.method === 'GET' && request.url === '/api/orders') { listOrders(request, response); return; }
     if (request.method === 'GET') { serveStatic(request, response); return; }
     response.writeHead(405); response.end('Method not allowed');
   } catch { sendJson(response, 500, { message: 'Payment server error.' }); }
